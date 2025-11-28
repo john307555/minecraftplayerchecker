@@ -1,128 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Minecraft Player Viewer</title>
-    <style>
-        body {
-            background: #0d0d0d;
-            color: white;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px;
-        }
-        .box {
-            background: #1a1a1a;
-            padding: 25px;
-            border-radius: 10px;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.4);
-        }
-        input {
-            width: 80%;
-            padding: 10px;
-            border-radius: 6px;
-            border: none;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            background: #4caf50;
-            color: white;
-            margin: 5px;
-        }
-        #viewer {
-            display: flex;
-            justify-content: center;
-            gap: 20px; /* spacing between head and body */
-            margin-top: 15px;
-        }
-        #viewer img {
-            display: none;
-            border: 2px solid #4caf50;
-            border-radius: 8px;
-            object-fit: contain;
-        }
-        #head {
-            width: 120px;
-            height: 120px;
-        }
-        #body {
-            width: 100px;
-            height: auto;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Minecraft Player Viewer</title>
+<style>
+    body {
+        background: #0d0d0d;
+        color: white;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+    }
+    .box {
+        background: #1a1a1a;
+        padding: 25px;
+        border-radius: 10px;
+        width: 420px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+    input {
+        width: 80%;
+        padding: 10px;
+        border-radius: 6px;
+        border: none;
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+    button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        background: #4caf50;
+        color: white;
+        margin: 5px;
+    }
+    #viewer {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 20px;
+        margin-top: 15px;
+    }
+    #viewer img {
+        display: none;
+        border: 2px solid #4caf50;
+        border-radius: 8px;
+        image-rendering: pixelated; /* makes it look crisp */
+    }
+    #head {
+        width: 120px;
+        height: 120px;
+    }
+    #body {
+        width: 100px;
+        height: 160px;
+    }
+    #result {
+        margin-top: 20px;
+        font-size: 18px;
+    }
+</style>
 </head>
 <body>
-    <div class="box">
-        <h2>MC Player Viewer</h2>
-        <input id="name" placeholder="Enter username" />
-        <button onclick="checkPlayer()">View Player</button>
-        <div id="viewer">
-            <img id="head" />
-            <img id="body" />
-        </div>
-        <button id="downloadBtn" style="display:none;" onclick="downloadSkin()">Download Skin Texture</button>
-        <div id="result"></div>
+<div class="box">
+    <h2>MC Player Viewer</h2>
+    <input id="name" placeholder="Enter username" />
+    <button onclick="checkPlayer()">View Player</button>
+    <div id="viewer">
+        <img id="head" />
+        <img id="body" />
     </div>
+    <button id="downloadBtn" style="display:none;" onclick="downloadSkin()">Download Skin</button>
+    <div id="result"></div>
+</div>
 
-    <script>
-        let currentUser = "";
+<script>
+    let currentUser = "";
+    let currentSkinUrl = "";
 
-        function checkPlayer() {
-            const user = document.getElementById("name").value.trim();
-            const head = document.getElementById("head");
-            const body = document.getElementById("body");
-            const result = document.getElementById("result");
-            const downloadBtn = document.getElementById("downloadBtn");
+    async function getUUID(username) {
+        const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.id; // Mojang UUID
+    }
 
-            if (!user) {
-                result.innerHTML = "Please enter a username.";
-                head.style.display = "none";
-                body.style.display = "none";
-                downloadBtn.style.display = "none";
-                return;
-            }
+    async function checkPlayer() {
+        const user = document.getElementById("name").value.trim();
+        const head = document.getElementById("head");
+        const body = document.getElementById("body");
+        const result = document.getElementById("result");
+        const downloadBtn = document.getElementById("downloadBtn");
 
-            currentUser = user;
-
-            // Show head and body images
-            head.src = `https://mc-heads.net/avatar/${user}/100`; // head preview
-            body.src = `https://mc-heads.net/body/${user}/200`;  // body preview
-
-            head.style.display = "inline-block";
-            body.style.display = "inline-block";
-            downloadBtn.style.display = "inline-block";
-
-            result.innerHTML = `<p><strong>Player:</strong> ${user}</p>`;
+        if (!user) {
+            result.innerHTML = "Please enter a username.";
+            head.style.display = "none";
+            body.style.display = "none";
+            downloadBtn.style.display = "none";
+            return;
         }
 
-        async function downloadSkin() {
-            if (!currentUser) return;
+        currentUser = user;
 
-            // Fetch the actual skin texture
-            const skinUrl = `https://mc-heads.net/skin/${currentUser}`;
-            const response = await fetch(skinUrl);
-            const blob = await response.blob();
-
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `${currentUser}_skin.png`;
-            link.click();
+        const uuid = await getUUID(user);
+        if (!uuid) {
+            result.innerHTML = "Player not found.";
+            head.style.display = "none";
+            body.style.display = "none";
+            downloadBtn.style.display = "none";
+            return;
         }
-    </script>
+
+        // High-quality skin URL
+        currentSkinUrl = `https://crafatar.com/skins/${uuid}`;
+
+        // Head and body previews
+        head.src = `https://crafatar.com/avatars/${uuid}?size=120&overlay`;
+        body.src = `https://crafatar.com/renders/body/${uuid}?size=200&overlay`;
+
+        head.style.display = "inline-block";
+        body.style.display = "inline-block";
+        downloadBtn.style.display = "inline-block";
+
+        result.innerHTML = `<p><strong>Player:</strong> ${user}</p>`;
+    }
+
+    async function downloadSkin() {
+        if (!currentSkinUrl) return;
+        const response = await fetch(currentSkinUrl);
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `${currentUser}_skin.png`;
+        link.click();
+    }
+</script>
 </body>
 </html>
