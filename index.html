@@ -18,7 +18,7 @@
             background: #1a1a1a;
             padding: 25px;
             border-radius: 10px;
-            width: 350px;
+            width: 400px;
             text-align: center;
             box-shadow: 0 0 20px rgba(0,0,0,0.4);
         }
@@ -40,11 +40,18 @@
             color: white;
             margin: 5px;
         }
-        #head, #body {
+        #viewer {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* spacing between head and body */
             margin-top: 15px;
-            width: 100px;
-            height: 100px;
+        }
+        #viewer img {
+            max-width: 120px;
+            height: auto;
             display: none;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
         }
         #result {
             margin-top: 20px;
@@ -57,7 +64,7 @@
         <h2>MC Player Viewer</h2>
         <input id="name" placeholder="Enter username" />
         <button onclick="checkPlayer()">View Player</button>
-        <div>
+        <div id="viewer">
             <img id="head" />
             <img id="body" />
         </div>
@@ -68,7 +75,7 @@
     <script>
         let currentUser = "";
 
-        function checkPlayer() {
+        async function checkPlayer() {
             const user = document.getElementById("name").value.trim();
             const head = document.getElementById("head");
             const body = document.getElementById("body");
@@ -85,21 +92,24 @@
 
             currentUser = user;
 
-            // Show head and body images
             head.src = `https://mc-heads.net/avatar/${user}/100`;
-            body.src = `https://mc-heads.net/body/${user}/100`;
+            body.src = `https://mc-heads.net/body/${user}/200`; // taller body image
+
             head.style.display = "inline-block";
             body.style.display = "inline-block";
-
             downloadBtn.style.display = "inline-block";
 
             result.innerHTML = `<p><strong>Player:</strong> ${user}</p>`;
         }
 
-        function downloadSkin() {
+        async function downloadSkin() {
             if (!currentUser) return;
+
+            const url = `https://mc-heads.net/body/${currentUser}/200`;
+            const response = await fetch(url);
+            const blob = await response.blob();
             const link = document.createElement("a");
-            link.href = `https://mc-heads.net/body/${currentUser}/100.png`;
+            link.href = URL.createObjectURL(blob);
             link.download = `${currentUser}_skin.png`;
             link.click();
         }
