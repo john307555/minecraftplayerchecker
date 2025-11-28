@@ -51,7 +51,7 @@
         display: none;
         border: 2px solid #4caf50;
         border-radius: 8px;
-        image-rendering: pixelated; /* makes it look crisp */
+        image-rendering: pixelated;
     }
     #head {
         width: 120px;
@@ -84,14 +84,7 @@
     let currentUser = "";
     let currentSkinUrl = "";
 
-    async function getUUID(username) {
-        const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-        if (!res.ok) return null;
-        const data = await res.json();
-        return data.id; // Mojang UUID
-    }
-
-    async function checkPlayer() {
+    function checkPlayer() {
         const user = document.getElementById("name").value.trim();
         const head = document.getElementById("head");
         const body = document.getElementById("body");
@@ -108,21 +101,11 @@
 
         currentUser = user;
 
-        const uuid = await getUUID(user);
-        if (!uuid) {
-            result.innerHTML = "Player not found.";
-            head.style.display = "none";
-            body.style.display = "none";
-            downloadBtn.style.display = "none";
-            return;
-        }
-
-        // High-quality skin URL
-        currentSkinUrl = `https://crafatar.com/skins/${uuid}`;
-
-        // Head and body previews
-        head.src = `https://crafatar.com/avatars/${uuid}?size=120&overlay`;
-        body.src = `https://crafatar.com/renders/body/${uuid}?size=200&overlay`;
+        // Crafatar supports usernames directly
+        const encodedUser = encodeURIComponent(user);
+        head.src = `https://crafatar.com/avatars/${encodedUser}?size=120&overlay`;
+        body.src = `https://crafatar.com/renders/body/${encodedUser}?size=200&overlay`;
+        currentSkinUrl = `https://crafatar.com/skins/${encodedUser}`;
 
         head.style.display = "inline-block";
         body.style.display = "inline-block";
@@ -133,12 +116,20 @@
 
     async function downloadSkin() {
         if (!currentSkinUrl) return;
-        const response = await fetch(currentSkinUrl);
-        const blob = await response.blob();
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `${currentUser}_skin.png`;
-        link.click();
+        try {
+            const response = await fetch(currentSkinUrl);
+            if (!response.ok) {
+                alert("Failed to download skin.");
+                return;
+            }
+            const blob = await response.blob();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${currentUser}_skin.png`;
+            link.click();
+        } catch (e) {
+            alert("Error downloading skin.");
+        }
     }
 </script>
 </body>
