@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Minecraft Last Seen Checker</title>
+    <title>Minecraft Player Viewer</title>
     <style>
         body {
             background: #0d0d0d;
@@ -38,11 +38,13 @@
             cursor: pointer;
             background: #4caf50;
             color: white;
+            margin: 5px;
         }
-        #skin {
+        #head, #body {
             margin-top: 15px;
             width: 100px;
             height: 100px;
+            display: none;
         }
         #result {
             margin-top: 20px;
@@ -52,39 +54,54 @@
 </head>
 <body>
     <div class="box">
-        <h2>MC Player Checker</h2>
+        <h2>MC Player Viewer</h2>
         <input id="name" placeholder="Enter username" />
-        <button onclick="checkPlayer()">Check</button>
-        <img id="skin" style="display:none;" />
+        <button onclick="checkPlayer()">View Player</button>
+        <div>
+            <img id="head" />
+            <img id="body" />
+        </div>
+        <button id="downloadBtn" style="display:none;" onclick="downloadSkin()">Download Skin</button>
         <div id="result"></div>
     </div>
 
     <script>
-        function randomLastSeen() {
-            const hours = Math.floor(Math.random() * 48) + 1;
-            return `${hours} hours ago`;
-        }
+        let currentUser = "";
 
         function checkPlayer() {
-            const user = document.getElementById("name").value;
+            const user = document.getElementById("name").value.trim();
+            const head = document.getElementById("head");
+            const body = document.getElementById("body");
             const result = document.getElementById("result");
-            const skin = document.getElementById("skin");
+            const downloadBtn = document.getElementById("downloadBtn");
 
-            if (user.trim() === "") {
+            if (!user) {
                 result.innerHTML = "Please enter a username.";
+                head.style.display = "none";
+                body.style.display = "none";
+                downloadBtn.style.display = "none";
                 return;
             }
 
-            skin.style.display = "block";
-            skin.src = `https://mc-heads.net/avatar/${user}/100`;
+            currentUser = user;
 
-            const lastSeen = randomLastSeen();
+            // Show head and body images
+            head.src = `https://mc-heads.net/avatar/${user}/100`;
+            body.src = `https://mc-heads.net/body/${user}/100`;
+            head.style.display = "inline-block";
+            body.style.display = "inline-block";
 
-            result.innerHTML = `
-                <p><strong>Player:</strong> ${user}</p>
-                <p><strong>Last Seen:</strong> ${lastSeen}</p>
-                <p>Status: Offline</p>
-            `;
+            downloadBtn.style.display = "inline-block";
+
+            result.innerHTML = `<p><strong>Player:</strong> ${user}</p>`;
+        }
+
+        function downloadSkin() {
+            if (!currentUser) return;
+            const link = document.createElement("a");
+            link.href = `https://mc-heads.net/body/${currentUser}/100.png`;
+            link.download = `${currentUser}_skin.png`;
+            link.click();
         }
     </script>
 </body>
