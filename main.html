@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minecraft Last Seen Checker</title>
+    <style>
+        body {
+            background: #0d0d0d;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+        .box {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 10px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #4caf50;
+            color: white;
+        }
+        #skin {
+            margin-top: 15px;
+            width: 100px;
+            height: 100px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>MC Last Seen Checker (Fake)</h2>
+        <input id="name" placeholder="Enter username" />
+        <button onclick="checkPlayer()">Check</button>
+        <img id="skin" style="display:none;" />
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function randomLastSeen() {
+            const hours = Math.floor(Math.random() * 48) + 1;
+            return `${hours} hours ago`;
+        }
+
+        function checkPlayer() {
+            const user = document.getElementById("name").value;
+            const result = document.getElementById("result");
+            const skin = document.getElementById("skin");
+
+            if (user.trim() === "") {
+                result.innerHTML = "Please enter a username.";
+                return;
+            }
+
+            skin.style.display = "block";
+            skin.src = `https://mc-heads.net/avatar/${user}/100`;
+
+            const lastSeen = randomLastSeen();
+
+            result.innerHTML = `
+                <p><strong>Player:</strong> ${user}</p>
+                <p><strong>Last Seen:</strong> ${lastSeen}</p>
+                <p>Status: Offline</p>
+            `;
+        }
+    </script>
+</body>
+</html>
