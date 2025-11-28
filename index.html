@@ -47,11 +47,18 @@
             margin-top: 15px;
         }
         #viewer img {
-            max-width: 120px;
-            height: auto;
             display: none;
             border: 2px solid #4caf50;
             border-radius: 8px;
+            object-fit: contain;
+        }
+        #head {
+            width: 120px;
+            height: 120px;
+        }
+        #body {
+            width: 100px;
+            height: auto;
         }
         #result {
             margin-top: 20px;
@@ -68,14 +75,14 @@
             <img id="head" />
             <img id="body" />
         </div>
-        <button id="downloadBtn" style="display:none;" onclick="downloadSkin()">Download Skin</button>
+        <button id="downloadBtn" style="display:none;" onclick="downloadSkin()">Download Skin Texture</button>
         <div id="result"></div>
     </div>
 
     <script>
         let currentUser = "";
 
-        async function checkPlayer() {
+        function checkPlayer() {
             const user = document.getElementById("name").value.trim();
             const head = document.getElementById("head");
             const body = document.getElementById("body");
@@ -92,8 +99,9 @@
 
             currentUser = user;
 
-            head.src = `https://mc-heads.net/avatar/${user}/100`;
-            body.src = `https://mc-heads.net/body/${user}/200`; // taller body image
+            // Show head and body images
+            head.src = `https://mc-heads.net/avatar/${user}/100`; // head preview
+            body.src = `https://mc-heads.net/body/${user}/200`;  // body preview
 
             head.style.display = "inline-block";
             body.style.display = "inline-block";
@@ -105,9 +113,11 @@
         async function downloadSkin() {
             if (!currentUser) return;
 
-            const url = `https://mc-heads.net/body/${currentUser}/200`;
-            const response = await fetch(url);
+            // Fetch the actual skin texture
+            const skinUrl = `https://mc-heads.net/skin/${currentUser}`;
+            const response = await fetch(skinUrl);
             const blob = await response.blob();
+
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = `${currentUser}_skin.png`;
